@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lyric Transformer</title>
+    <style>
+      .input-area,
+      .output-area {
+        width: 100%;
+        min-height: 200px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      .output-area {
+        cursor: pointer;
+        white-space: pre-wrap;
+      }
+      .highlighted {
+        background-color: lightyellow;
+      }
+      button {
+        padding: 10px 20px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea class="input-area" placeholder="Enter lyrics here..."></textarea>
+    <div class="output-area"></div>
+    <button onclick="displayTransformedLyrics()">Display New Lyrics</button>
+    <button onclick="copyToClipboard()">Copy Lyrics</button>
+
+    <script>
+      function displayTransformedLyrics() {
+        const inputText = document.querySelector(".input-area").value;
+        const outputArea = document.querySelector(".output-area");
+        outputArea.innerHTML = ""; // Clear previous output
+
+        inputText.split("\n").forEach((line) => {
+          let div = document.createElement("div");
+          line.split(" ").forEach((word) => {
+            let span = document.createElement("span");
+            span.textContent = word + " "; // Preserve original spacing
+            span.setAttribute("data-original", word);
+            span.onclick = function () {
+              toggleWordTransformation(span);
+            };
+            div.appendChild(span);
+          });
+          outputArea.appendChild(div);
+        });
+      }
+
+      function toggleWordTransformation(span) {
+        if (span.classList.contains("highlighted")) {
+          span.textContent = span.getAttribute("data-original") + " ";
+          span.classList.remove("highlighted");
+        } else {
+          span.textContent =
+            applyTransformations(span.getAttribute("data-original")) + " ";
+          span.classList.add("highlighted");
+        }
+      }
+
+      function applyTransformations(word) {
+        // This function now directly uses the updated transformation logic
+        return transformWord(word);
+      }
+      function transformWord(word) {
+        // Special handling for "I" and "my"
+        if (word.toLowerCase() === "i") return "eeoo_Oh";
+        if (word.toLowerCase() === "my") return "Mee_uh";
+
+        let transformed = "";
+        // Prepend 'Y' for words starting with a vowel
+        if ("aeiou".includes(word[0].toLowerCase())) {
+          transformed = "Yee";
+        }
+
+        for (let i = 0; i < word.length; i++) {
+          const char = word[i];
+          const nextChar = word[i + 1] || "";
+          const nextNextChar = word[i + 2] || "";
+
+          // Handling for "ght" to be treated as "t"
+          if (
+            char.toLowerCase() === "g" &&
+            nextChar.toLowerCase() === "h" &&
+            nextNextChar.toLowerCase() === "t"
+          ) {
+            transformed += "D"; // Transform "ght" as "t" to "D"
+            i += 2; // Skip the 'h' and 't' as they're part of the "ght" combination
+            continue;
+          }
+
+          if ("bcdfghjklmnpqrstvwxyz".includes(char.toLowerCase())) {
+            // Apply specific transformations based on the consonant
+            let consonantTransform = "";
+            switch (char.toLowerCase()) {
+              case "f":
+                consonantTransform = "V";
+                break;
+              case "s":
+                consonantTransform = "Z";
+                break;
+              case "t":
+                consonantTransform = "D";
+                break;
+              default:
+                consonantTransform = char.toUpperCase(); // Default transformation for other consonants
+            }
+            transformed += consonantTransform;
+
+            // Append 'ee' if it's not the last character or the next character is a vowel
+            if (
+              i !== word.length - 1 &&
+              "aeiou".includes(nextChar.toLowerCase())
+            ) {
+              transformed += "ee";
+            }
+          } else if ("aeiou".includes(char.toLowerCase())) {
+            // Transform vowel to "oo_Oh"
+            transformed += "oo_Oh";
+          } else {
+            // Directly append any other characters (like hyphens or punctuation)
+            transformed += char;
+          }
+        }
+
+        // Final failsafe: replace any instance of "oo_Ohoo_Oh" with "oo_Oh"
+        transformed = transformed.replace(/oo_Ohoo_Oh/g, "oo_Oh");
+
+        return transformed;
+      }
+
+      function copyToClipboard() {
+        const outputText = document.querySelector(".output-area").innerText;
+        navigator.clipboard
+          .writeText(outputText)
+          .then(() => alert("Lyrics copied!"))
+          .catch((err) => console.error("Error copying:", err));
+      }
+    </script>
+  </body>
+</html>
