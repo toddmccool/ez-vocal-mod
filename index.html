@@ -68,41 +68,54 @@
         return transformWord(word);
       }
       function transformWord(word) {
-        // Special handling for "I" and "my"
+        let transformed = "";
+
+        // Handling for "I" and "my"
         if (word.toLowerCase() === "i") return "eeoo_Oh";
         if (word.toLowerCase() === "my") return "Mee_uh";
 
-        let transformed = "";
-        // Prepend 'Y' for words starting with a vowel
-        if ("aeiou".includes(word[0].toLowerCase())) {
+        // Prepend 'Yee' for words starting with a vowel, considering special handling for "qu"
+        if (
+          "aeiou".includes(word[0].toLowerCase()) &&
+          !(
+            word.length > 1 &&
+            word[0].toLowerCase() === "q" &&
+            word[1].toLowerCase() === "u"
+          )
+        ) {
           transformed = "Yee";
         }
 
         for (let i = 0; i < word.length; i++) {
           const char = word[i];
           const nextChar = word[i + 1] || "";
-          const nextNextChar = word[i + 2] || "";
 
-          // Handling for "ght" to be treated as "t"
-          if (
-            char.toLowerCase() === "g" &&
-            nextChar.toLowerCase() === "h" &&
-            nextNextChar.toLowerCase() === "t"
-          ) {
-            transformed += "D"; // Transform "ght" as "t" to "D"
-            i += 2; // Skip the 'h' and 't' as they're part of the "ght" combination
-            continue;
+          // Directly handle "qu" transformation to "Gw", skipping the next char
+          if (char.toLowerCase() === "q" && nextChar.toLowerCase() === "u") {
+            transformed += "Gw";
+            i += 1; // Skip 'u'
+            continue; // Continue to the next iteration
           }
 
+          if (char.toLowerCase() === "t" && nextChar.toLowerCase() === "h") {
+            transformed += "th";
+            i += 1; // Skip 'h'
+            continue; // Continue to the next iteration
+          }
+
+          // Handling consonants and applying transformations
           if ("bcdfghjklmnpqrstvwxyz".includes(char.toLowerCase())) {
-            // Apply specific transformations based on the consonant
-            let consonantTransform = "";
+            let consonantTransform = char.toUpperCase(); // Default to uppercase for any consonant
+
             switch (char.toLowerCase()) {
               case "f":
                 consonantTransform = "V";
                 break;
-              case "dr":
-                consonantTransform = "Nr";
+              case "p":
+                consonantTransform = "mB";
+                break;
+              case "b":
+                consonantTransform = "mB";
                 break;
               case "d":
                 consonantTransform = "N";
@@ -113,13 +126,12 @@
               case "t":
                 consonantTransform = "dY";
                 break;
-              default:
-                consonantTransform = char.toUpperCase(); // Default transformation for other consonants
+              // Add more cases as needed
             }
 
             transformed += consonantTransform;
 
-            // Append 'ee' if it's not the last character or the next character is a vowel
+            // Append 'ee' if it's not the last character and the next character is a vowel
             if (
               i !== word.length - 1 &&
               "aeiou".includes(nextChar.toLowerCase())
